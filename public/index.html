@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form - MongoDB</title>
+    <style>
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .form-card { background: #fff; padding: 30px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; background: #001e2b; color: #00ed64; padding: 10px; border: none; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .status { margin-top: 15px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="form-card">
+    <h2>Submit Data to MongoDB</h2>
+    <form id="contactForm">
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" rows="4" required></textarea>
+        </div>
+        <button type="submit">Save Document</button>
+        <p id="status" class="status"></p>
+    </form>
+</div>
+
+<script>
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const statusEl = document.getElementById('status');
+        statusEl.style.color = '#333';
+        statusEl.textContent = 'Saving...';
+
+        const payload = {
+            fullName: document.getElementById('fullName').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            message: document.getElementById('message').value.trim()
+        };
+
+        try {
+            const res = await fetch('/api/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                statusEl.style.color = 'green';
+                statusEl.textContent = `${data.message} ID: ${data.submissionId}`;
+                document.getElementById('contactForm').reset();
+            } else {
+                statusEl.style.color = 'red';
+                statusEl.textContent = data.error || 'Submission failed.';
+            }
+        } catch (err) {
+            statusEl.style.color = 'red';
+            statusEl.textContent = 'Server/Network Error.';
+        }
+    });
+</script>
+
+</body>
+</html>
